@@ -250,6 +250,28 @@
            scroll-margin-top: 0;
         }
 
+        @media (min-width: 992px) {
+    /* Membuat profil menjadi dua kolom */
+          header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: left;
+            gap: 4rem;
+            padding: 6rem 2rem;
+          }
+
+          .intro {
+            max-width: 500px;
+            margin: 0;
+          }
+
+          /* Efek hover kartu yang lebih dinamis */
+          .portfolio-item:hover {
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+          }
+        }
+        
     </style>
 </head>
 <body>
