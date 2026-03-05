@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portofolio DKV - Raihan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2d3436;
+            --accent-color: #0984e3;
+            --bg-color: #f5f6fa;
+            --text-color: #2d3436;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .modal-open {
+            overflow: hidden;
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            transition: 0.3s;
+            /* Underline dihapus sepenuhnya */
+            border-bottom: none; 
+        }
+
+        nav a:hover {
+            color: var();
+        }
+
+        /* --- OPSI TERPILIH: Hanya Warna --- */
+        nav a.active {
+            color: var(--accent-color);
+        }
+
+        header {
+            background: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--accent-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .intro h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .intro p {
+            max-width: 600px;
+            margin: 1rem auto;
+            font-size: 1.1rem;
+            color: #636e72;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 4px;
+            background: var(--accent-color);
+            margin: 10px auto;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .portfolio-item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .portfolio-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .portfolio-info {
+            padding: 1.5rem;
+        }
+
+        .portfolio-info h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-color);
+        }
+
+        .contact-section {
+            background: white;
+            padding: 2rem 1rem 4rem 1rem;
+            text-align: center;
+        }
+
+        .contact-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .contact-box {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            background: var(--bg-color);
+            transition: 0.3s;
+            text-align: left;
+        }
+
+        .contact-box:hover {
+            background: #eef1f7;
+            transform: translateX(5px);
+        }
+
+        .contact-box i {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            margin-right: 1.2rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .contact-content h4 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .contact-content a {
+            text-decoration: none;
+            color: #636e72;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 85%;
+            border-radius: 4px;
+            box-shadow: 0 0 25px rgba(255,255,255,0.15);
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--primary-color);
+            color: white;
+        }
+
+        #portfolio, #contact {
+          scroll-margin-top: 80px; 
+        }
+
+        #about {
+           scroll-margin-top: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="about"></div>
+
+    <nav>
+        <a href="#about" class="active">Tentang</a>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#contact">Kontak</a>
+    </nav>
+
+    <header>
+        <img src="profil.jpg" alt="Raihan" class="profile-img">
+        <div class="intro">
+            <h1>Halo, Saya Raihan.</h1>
+            <p>Visual Designer & Creative Enthusiast, berfokus pada integrasi desain grafis, fotografi, dan pengembangan web.</p>
+        </div>
+    </header>
+
+    <div class="container" id="portfolio">
+        <h2 class="section-title">Karya Saya</h2>
+        <div class="portfolio-grid">
+            <div class="portfolio-item" onclick="openModal('Seam.jpg')">
+                <img src="Seam.jpg" alt="Image">
+                <div class="portfolio-info">
+                    <h3>Sea Monsters: Growth and Loneliness</h3>
+                    <p>Desain poster bertema kelautan yang menekankan kontras antara kekuatan makhluk besar dengan kesunyian di kedalaman samudra.</p>
+                </div>
+            </div>
+
+            <div class="portfolio-item" onclick="openModal('Cheetah.jpg')">
+                <img src="Cheetah.jpg" alt="Image">
+                <div class="portfolio-info">
+                    <h3>C for Cheetah</h3>
+                    <p>Penggabungan identitas huruf "C" dengan estetika fauna untuk menciptakan visual yang ikonik.</p>
+                </div>
+            </div>
+
+            <div class="portfolio-item" onclick="openModal('Buffalo.jpg')">
+                <img src="Buffalo.jpg" alt="Image">
+                <div class="portfolio-info">
+                    <h3>The Guardian of the Hidden Valley</h3>
+                    <p>Eksplorasi teknik digital imaging yang menggabungkan skala raksasa dengan lanskap alam untuk menciptakan kesan megah dan surealis.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="contact-section" id="contact">
+        <h2 class="section-title">Mari Berkolaborasi</h2>
+        <div class="contact-container">
+            <div class="contact-box">
+                <i class="fas fa-envelope"></i>
+                <div class="contact-content">
+                    <h4>Email</h4>
+                    <a href="mailto:raihan.zidan2709@gmail.com">raihan.zidan2709@gmail.com</a>
+                </div>
+            </div>
+            <div class="contact-box">
+                <i class="fab fa-whatsapp"></i>
+                <div class="contact-content">
+                    <h4>WhatsApp</h4>
+                    <a href="https://wa.me/6285819634133" target="_blank">+62 858 1963 4133</a>
+                </div>
+            </div>
+            <div class="contact-box">
+                <i class="fab fa-instagram"></i>
+                <div class="contact-content">
+                    <h4>Instagram</h4>
+                    <a href="https://instagram.com/raaihanzr" target="_blank">@raaihanzr</a>
+                </div>
+            </div>
+            <div class="contact-box">
+                <i class="fas fa-map-marker-alt"></i>
+                <div class="contact-content">
+                    <h4>Lokasi</h4>
+                    <a href="https://maps.app.goo.gl/qG4HQiLpu4z6RG9X7">Tangerang Selatan, ID</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal" onclick="closeModal(event)">
+        <span class="close-modal"><i class="fas fa-xmark"></i></span>
+        <img id="imgPreview" src="" alt="Preview">
+    </div>
+
+    <footer>
+        <p>© 2026 Raihan - Tangerang Selatan</p>
+    </footer>
+
+    <script>
+ 
+const navLinks = document.querySelectorAll('nav a');
+const modal = document.getElementById('myModal');
+const imgPreview = document.getElementById('imgPreview');
+const body = document.body;
+
+function updateActiveLink() {
+    let current = "";
+    const sections = ['about', 'portfolio', 'contact'];
+    
+    // Kita gunakan scrollPosition untuk deteksi yang lebih presisi
+    const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+
+    sections.forEach((id) => {
+        const section = document.getElementById(id);
+        if (section) {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.offsetHeight;
+            
+            // Logika: Elemen dianggap aktif jika bagian atasnya sudah terpaut 
+            // sedikit dengan navbar (85px) ATAU jika kita sudah scroll dalam elemen tersebut
+            if (scrollPosition >= sectionTop - 85) {
+                current = id;
+            }
+        }
+    });
+
+    // Tambahan: Jika sudah mentok ke bawah (footer), paksa "Kontak" jadi aktif
+    if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 2) {
+        current = 'contact';
+    }
+
+    navLinks.forEach((link) => {
+        link.classList.remove("active");
+        if (link.getAttribute("href") === `#${current}`) {
+            link.classList.add("active");
+        }
+    });
+}
+
+window.addEventListener('scroll', updateActiveLink);
+
+navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        setTimeout(updateActiveLink, 100); // Jeda sedikit lebih lama agar scroll selesai
+    });
+});
+
+function openModal(src) {
+    imgPreview.src = src;
+    modal.style.display = 'flex';
+    body.classList.add('modal-open');
+}
+
+function closeModal(e) {
+    if (e && e.target === imgPreview) return;
+    modal.style.display = 'none';
+    imgPreview.src = '';
+    body.classList.remove('modal-open');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+        closeModal();
+    }
+});
+
+
+    </script>
+
+</body>
+</html>
