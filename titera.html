@@ -198,40 +198,35 @@
         .aqi-moderate { background: #fef7e0; color: #b06000; }
         .aqi-poor { background: #fce8e6; color: #c5221f; }
 
-        /* --- STOCK TICKER STYLES --- */
-        .stock-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            white-space: nowrap;
-            padding: 2px 0 4px 0;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            display: flex;
-            gap: 10px;
-        }
-        .stock-wrapper::-webkit-scrollbar { display: none; }
-
+        /* --- STOCK CARD STYLES --- */
         .stock-card {
-            background: var(--card-white);
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            padding: 10px 14px;
-            min-width: 100px;
             display: flex;
-            flex-direction: column;
-            gap: 4px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-            cursor: pointer;
-            transition: background-color 0.2s ease;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            margin-bottom: 4px;
         }
-        .stock-card:hover { background: rgba(26, 115, 232, 0.03); }
-
-        .stock-name { font-size: 0.75rem; font-weight: 700; color: var(--text-gray); }
-        .stock-price { font-size: 0.95rem; font-weight: 700; color: var(--text-dark); }
-        .stock-change { font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 4px;}
-
-        .stock-up { color: #0b9444; } 
-        .stock-down { color: #d93025; } 
+        .stock-icon {
+            background: rgba(26, 115, 232, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--google-blue);
+        }
+        .stock-info h3 { margin: 0; font-size: 0.95rem; color: var(--text-dark); }
+        .stock-info p { margin: 0; font-size: 0.7rem; color: var(--text-gray); margin-top: 2px; }
+        .stock-value { text-align: right; }
+        .stock-value h3 { margin: 0; font-size: 1.05rem; color: var(--text-dark); }
+        .stock-change {
+            margin: 4px 0 0 0;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+        }
 
         /* --- CATEGORY SLIDER STYLES --- */
         .category-wrapper {
@@ -241,7 +236,7 @@
             padding: 4px 0;
             -ms-overflow-style: none;
             scrollbar-width: none;
-            scroll-behavior: smooth; 
+            scroll-behavior: smooth;
         }
         .category-wrapper::-webkit-scrollbar { display: none; }
         .category-btn {
@@ -439,9 +434,23 @@
             </div>
         </div>
 
-        <div class="stock-wrapper" id="stock-container">
+        <div class="card stock-card" onclick="window.open('https://finance.yahoo.com/quote/%5EJKSE/', '_blank')" style="cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="stock-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                </div>
+                <div class="stock-info">
+                    <h3>IHSG</h3>
+                    <p>Bursa Efek Indonesia</p>
+                </div>
             </div>
-
+            <div class="stock-value">
+                <h3 id="stock-price">Memuat...</h3>
+                <span id="stock-change" class="stock-change" style="background: #f1f3f4; color: var(--text-gray);">--</span>
+            </div>
+        </div>
         <div class="category-wrapper" id="category-wrapper">
             <button class="category-btn active" onclick="handleCategoryChange('terkini')">Terkini</button>
             <button class="category-btn" onclick="handleCategoryChange('teknologi')">Teknologi</button>
@@ -582,86 +591,42 @@
             } catch (e) {}
         }
 
-        // NEW: REAL-TIME STOCK FETCH (CACHE + PROGRESSIVE RENDERING)
-        async function fetchRealTimeStocks() {
-            const container = document.getElementById('stock-container');
-            const now = new Date().getTime();
-            
-            // 1. Cek Data di Local Storage (Cache 5 Menit)
-            const cachedData = localStorage.getItem('stockCache');
-            const cacheTime = localStorage.getItem('stockCacheTime');
-            
-            if (cachedData && cacheTime && (now - parseInt(cacheTime) < 300000)) {
-                container.innerHTML = cachedData;
-                return; // Jika ada cache valid, hentikan fungsi agar tidak loading ulang
-            }
-
-            // 2. Siapkan Skeleton Loader untuk 4 Kartu
-            const symbols = [
-                { symbol: '^JKSE', name: 'IHSG' },
-                { symbol: '^GSPC', name: 'S&P 500' },
-                { symbol: '^IXIC', name: 'NASDAQ' },
-                { symbol: '^DJI', name: 'DOW JONES' }
-            ];
-            
-            let stockHTMLArray = new Array(symbols.length).fill(`
-                <div class="stock-card">
-                    <div class="skeleton" style="width: 40px; height: 12px; margin-bottom: 4px; border-radius: 2px;"></div>
-                    <div class="skeleton" style="width: 60px; height: 16px; margin-bottom: 4px; border-radius: 2px;"></div>
-                    <div class="skeleton" style="width: 50px; height: 12px; border-radius: 2px;"></div>
-                </div>
-            `);
-            
-            container.innerHTML = stockHTMLArray.join('');
-            let completedRequests = 0;
-
-            // 3. Tarik Data Secara Independen (Siapa cepat dia tampil duluan)
-            symbols.forEach((s, index) => {
-                const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s.symbol)}?interval=1d`;
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+        // FUNGSI BARU UNTUK FETCH DATA SAHAM (IHSG)
+        async function getStockData() {
+            try {
+                const targetUrl = encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/^JKSE?interval=1d&range=1d');
+                const url = `https://api.allorigins.win/get?url=${targetUrl}`;
                 
-                fetch(proxyUrl)
-                    .then(res => {
-                        if (!res.ok) throw new Error('Blocked');
-                        return res.json();
-                    })
-                    .then(data => {
-                        const meta = data.chart.result[0].meta;
-                        const currentPrice = meta.regularMarketPrice;
-                        const previousClose = meta.chartPreviousClose || meta.previousClose;
-                        const percentChange = (((currentPrice - previousClose) / previousClose) * 100).toFixed(2);
-                        const isUp = currentPrice >= previousClose;
-                        
-                        const colorClass = isUp ? 'stock-up' : 'stock-down';
-                        const icon = isUp ? '▲' : '▼';
-                        
-                        stockHTMLArray[index] = `
-                            <div class="stock-card">
-                                <span class="stock-name">${s.name}</span>
-                                <span class="stock-price">${currentPrice.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                                <span class="stock-change ${colorClass}">${icon} ${isUp ? '+' : ''}${percentChange}%</span>
-                            </div>
-                        `;
-                    })
-                    .catch(() => {
-                        stockHTMLArray[index] = `
-                            <div class="stock-card">
-                                <span class="stock-name">${s.name}</span>
-                                <span class="stock-price" style="color:var(--text-gray); font-size:0.85rem;">Tertunda</span>
-                            </div>
-                        `;
-                    })
-                    .finally(() => {
-                        completedRequests++;
-                        container.innerHTML = stockHTMLArray.join(''); // Update UI seketika
-                        
-                        // 4. Simpan ke Cache hanya jika semua sudah selesai merender
-                        if (completedRequests === symbols.length) {
-                            localStorage.setItem('stockCache', container.innerHTML);
-                            localStorage.setItem('stockCacheTime', now.toString());
-                        }
-                    });
-            });
+                const response = await fetch(url);
+                const json = await response.json();
+                const data = JSON.parse(json.contents);
+                
+                const result = data.chart.result[0];
+                const meta = result.meta;
+                const currentPrice = meta.regularMarketPrice;
+                const previousClose = meta.chartPreviousClose;
+                
+                const change = currentPrice - previousClose;
+                const percentChange = (change / previousClose) * 100;
+                
+                const priceEl = document.getElementById('stock-price');
+                const changeEl = document.getElementById('stock-change');
+                
+                priceEl.innerText = currentPrice.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                
+                if (change >= 0) {
+                    changeEl.innerText = `+${change.toFixed(2)} (+${percentChange.toFixed(2)}%)`;
+                    changeEl.style.color = '#137333'; 
+                    changeEl.style.backgroundColor = '#e6f4ea';
+                } else {
+                    changeEl.innerText = `${change.toFixed(2)} (${percentChange.toFixed(2)}%)`;
+                    changeEl.style.color = '#c5221f'; 
+                    changeEl.style.backgroundColor = '#fce8e6';
+                }
+            } catch (error) {
+                console.error("Gagal memuat data saham", error);
+                document.getElementById('stock-price').innerText = "Gagal memuat";
+            }
         }
 
         function getSkeletonHTML() {
@@ -818,9 +783,9 @@
         setInterval(updateClock, 1000);
         updateClock();
         getWeatherData();
+        getStockData(); // Memanggil data saham
         getNews(); 
         fetchPrayerTimes();
-        fetchRealTimeStocks(); 
     </script>
 </body>
 </html>
